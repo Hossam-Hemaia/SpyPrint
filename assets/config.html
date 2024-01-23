@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' 'unsafe-inline'"
+    />
+    <title>Spy Print</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+
+      h1 {
+        text-align: center;
+        color: #007bff;
+      }
+
+      div {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h3 {
+        color: #007bff;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+      }
+
+      button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 15px;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      p {
+        margin-bottom: 10px;
+      }
+
+      output {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Spy Print Configurations</h1>
+    <div>
+      <h3>Print Options</h3>
+      <div id="printers">
+        <label>Select Printer</label>
+        <button type="button" id="plistBtn">Get Available Printers</button>
+        <select name="printersList" id="plist"></select>
+      </div>
+      <div class="folderPath">
+        <label>
+          <input
+            type="radio"
+            name="togglePrintOption"
+            id="option1"
+            value="localFile"
+            checked
+          />
+          Read From Local Folder
+        </label>
+        <button type="button" id="fldrdilg">Select Folder Path</button>
+        <label for="pthout">Selected Path: <output id="pthout"></output></label>
+      </div>
+      <div>
+        <label>
+          <input
+            type="radio"
+            name="togglePrintOption"
+            value="serverFile"
+            id="option2"
+          />
+          Read From Server
+        </label>
+        <p>please note that you can connect only using websocket</p>
+        <p>Please specify the host and event listener name</p>
+        <label for="host">Host Url</label>
+        <input type="text" name="host" id="hostUrl" />
+        <label for="event">Event Listener Name</label>
+        <input type="text" name="socketEvent" id="soktevnt" />
+        <p>
+          please note that object data sent to the socket should look like the
+          following:
+        </p>
+        <p>{fileUrl: https://example.com/your/file/path}</p>
+      </div>
+      <button type="button" id="savPrntConf">Save</button>
+    </div>
+    <script src="./js/config.js"></script>
+  </body>
+</html>
