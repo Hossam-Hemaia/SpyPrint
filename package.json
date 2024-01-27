@@ -20,6 +20,7 @@
     "nodemon": "^3.0.2"
   },
   "dependencies": {
+    "electron-download-manager": "^2.1.2",
     "pdf-to-printer": "^5.6.0"
   }
 }

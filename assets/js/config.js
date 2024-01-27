@@ -6,7 +6,6 @@ const configFile = path.join(__dirname, "db", "appDb.json");
 const printersListBtn = document.getElementById("plistBtn");
 const selectPrinters = document.getElementById("plist");
 const savePrinterConfig = document.getElementById("savPrntConf");
-const options = document.querySelectorAll("[name=togglePrintOption]");
 const folderDialog = document.getElementById("fldrdilg");
 const output = document.getElementById("pthout");
 const hostInput = document.getElementById("hostUrl");
@@ -37,34 +36,26 @@ savePrinterConfig.addEventListener("click", async () => {
   const data = await fs.readFile(configFile, "utf-8");
   const configData = JSON.parse(data);
   const selectedPrinter = selectPrinters.value;
-  for (let option of options) {
-    if (option.checked) {
-      let optionValue = option.value;
-      if (optionValue === "localFile") {
-        if (output.innerText.length > 0) {
-          configData.printerOptions.readOption = "localFile";
-          configData.printerOptions.readPath = output.innerText;
-          configData.printerOptions.defaultPrinter = selectedPrinter;
-          await fs.writeFile(configFile, JSON.stringify(configData));
-          alert("configuration saved");
-        } else {
-          alert("you should select folder path first!");
-        }
-      } else if (option.value === "serverFile") {
-        let host = hostInput.value;
-        let socketName = socketInput.value;
-        if (socketName.length > 0) {
-          configData.printerOptions.readOption = "serverFile";
-          configData.printerOptions.readPath = host;
-          configData.printerOptions.eventListener = socketName;
-          configData.printerOptions.defaultPrinter = selectedPrinter;
-          await fs.writeFile(configFile, JSON.stringify(configData));
-          alert("configuration saved");
-        } else {
-          alert("Socket event name must be entered!");
-        }
-      }
-    }
+  if (output.innerText.length > 0) {
+    configData.printerOptions.readOption = "localFile";
+    configData.printerOptions.readPath = output.innerText;
+    configData.printerOptions.defaultPrinter = selectedPrinter;
+    await fs.writeFile(configFile, JSON.stringify(configData));
+    alert("configuration saved");
+  } else {
+    alert("you should select folder path first!");
+  }
+  let host = hostInput.value;
+  let socketName = socketInput.value;
+  if (socketName.length > 0) {
+    configData.printerOptions.readOption = "serverFile";
+    configData.printerOptions.host = host;
+    configData.printerOptions.eventListener = socketName;
+    configData.printerOptions.defaultPrinter = selectedPrinter;
+    await fs.writeFile(configFile, JSON.stringify(configData));
+    alert("configuration saved");
+  } else {
+    alert("Socket event name must be entered!");
   }
   window.close();
 });

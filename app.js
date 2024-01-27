@@ -81,6 +81,10 @@ const menu = [
   },
 ];
 
+const configFile = path.join(__dirname, "assets", "db", "appDb.json");
+const fileData = fs.readFileSync(configFile, "utf-8");
+const configData = JSON.parse(fileData);
+
 app.on("ready", () => {
   createMainWindow();
   const mainMenu = Menu.buildFromTemplate(menu);
@@ -110,12 +114,14 @@ app.on("ready", () => {
     tray.popUpContextMenu(contextMenu);
   });
   mainWindow.on("close", (e) => {
-    // if (!app.isQuitting) {
-    //   e.preventDefault();
-    //   mainWindow.hide();
-    // }
+    if (!app.isQuitting) {
+      e.preventDefault();
+      mainWindow.hide();
+    }
     return true;
   });
+  const defaultDownloadFolder = configData.printerOptions.readPath;
+  app.setPath("downloads", defaultDownloadFolder);
 });
 
 const getPrinters = async () => {
@@ -172,9 +178,6 @@ function printFile(filePath, printerName) {
 }
 
 ipcMain.on("print_silent", (e, data) => {
-  const configFile = path.join(__dirname, "assets", "db", "appDb.json");
-  const fileData = fs.readFileSync(configFile, "utf-8");
-  const configData = JSON.parse(fileData);
   printFile(data.path, configData.printerOptions.defaultPrinter);
 });
 

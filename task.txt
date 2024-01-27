@@ -1,0 +1,5 @@
+1- install the electron download package --Done
+2- make the application always watching a folder apart from printing files options -Done
+3- make electron download the file in the specific folder -Done
+4- print the file and test the application
+5- make the application work in the background --Done

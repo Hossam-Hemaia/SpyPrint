@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { ipcRenderer } = require("electron");
+const downloadManager = require("electron-download-manager");
 
 const configFile = path.join(__dirname, "db", "appDb.json");
 
@@ -36,20 +37,25 @@ const data = fs.readFileSync(configFile, "utf-8");
 const configData = JSON.parse(data);
 const option = configData.printerOptions.readOption;
 const hostPath = configData.printerOptions.readPath;
+const hostServer = configData.printerOptions.host;
 const socketEvent = configData.printerOptions.eventListener;
 if (hostPath.length <= 0) {
   alert("please select silent printing options first from settings menu");
 } else {
-  if (option === "localFile") {
-    watchFiles(path.join(hostPath));
-  } else if (option === "serverFile") {
-    const socket = io(hostPath, { transports: ["websocket", "polling"] });
+  watchFiles(path.join(hostPath));
+  if (option === "serverFile") {
+    const socket = io(hostServer, { transports: ["websocket", "polling"] });
     socket.on("connect", () => {
       alert("connected to server");
     });
     socket.on(`${socketEvent}`, (data) => {
-      console.log(data);
-      ipcRenderer.send("print_silent", { path: data.fileUrl });
+      downloadManager.download({
+        URL: data.fileUrl,
+        onprogress: (progress) => {
+          console.log(`Download Progress: ${progress}%`);
+        },
+      });
+      // ipcRenderer.send("print_silent", { path: data.fileUrl });
     });
   }
 }
