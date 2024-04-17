@@ -5,7 +5,7 @@ const printer = require("pdf-to-printer");
 
 const dbController = require("./controllers/dbController");
 // set env
-process.env.NODE_ENV = "development";
+process.env.NODE_ENV = "production";
 const isDev = process.env.NODE_ENV !== "production" ? true : false;
 // db init
 
@@ -31,7 +31,7 @@ async function getConfigurationData() {
   });
 }
 
-getConfigurationData();
+await getConfigurationData();
 
 ipcMain.on("set_configs", async (e, data) => {
   const configData = data.configData;
@@ -138,6 +138,7 @@ app.on("ready", () => {
   createMainWindow();
   const mainMenu = Menu.buildFromTemplate(menu);
   Menu.setApplicationMenu(mainMenu);
+  console.log(isDev);
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
@@ -267,4 +268,3 @@ app.on("activate", () => {
     createMainWindow();
   }
 });
-
