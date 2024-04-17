@@ -8,6 +8,7 @@ const selectPrinters = document.getElementById("plist");
 const savePrinterConfig = document.getElementById("savPrntConf");
 const folderDialog = document.getElementById("fldrdilg");
 const output = document.getElementById("pthout");
+const machineId = document.getElementById("mchnid");
 const hostInput = document.getElementById("hostUrl");
 const socketInput = document.getElementById("soktevnt");
 
@@ -40,6 +41,7 @@ savePrinterConfig.addEventListener("click", async () => {
     configData.printerOptions.readOption = "localFile";
     configData.printerOptions.readPath = output.innerText;
     configData.printerOptions.defaultPrinter = selectedPrinter;
+    configData.printerOptions.machineNo = machineId.value;
     await fs.writeFile(configFile, JSON.stringify(configData));
     alert("configuration saved");
   } else {

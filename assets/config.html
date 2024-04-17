@@ -73,7 +73,7 @@
     <div>
       <h3>Print Options</h3>
       <div id="printers">
-        <label>Select Printer</label>
+        <label>Select Printer* </label>
         <button type="button" id="plistBtn">Get Available Printers</button>
         <select name="printersList" id="plist"></select>
       </div>
@@ -83,18 +83,34 @@
         <label for="pthout">Selected Path: <output id="pthout"></output></label>
       </div>
       <div>
+        <label>Set Machine id</label>
+        <input
+          type="text"
+          name="machineNo"
+          id="mchnid"
+          placeholder="machine1"
+        />
+      </div>
+      <div>
         <label> Read From Server (Optional) </label>
         <p>please note that you can connect only using websocket</p>
         <p>Please specify the host and event listener name</p>
         <label for="host">Host Url</label>
         <input type="text" name="host" id="hostUrl" />
+        <p>Example: https://your-domain.com or wss://your-domain.com</p>
         <label for="event">Event Listener Name</label>
         <input type="text" name="socketEvent" id="soktevnt" />
         <p>
           please note that object data sent to the socket should look like the
           following:
         </p>
-        <p>{fileUrl: https://example.com/your/file/path}</p>
+        <p>
+          {fileUrl: https://example.com/your/file/path, machineNo: machine1}
+        </p>
+        <p>
+          This option allows you to send the print job to specific machine1 if
+          the file is generated on the server
+        </p>
       </div>
       <button type="button" id="savPrntConf">Save</button>
     </div>

@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { app, BrowserWindow, Menu, dialog, ipcMain, Tray } = require("electron");
+const DownloadManager = require("electron-download-manager");
 const printer = require("pdf-to-printer");
 // set env
 process.env.NODE_ENV = "development";
@@ -9,6 +10,14 @@ const isDev = process.env.NODE_ENV !== "production" ? true : false;
 let mainWindow;
 let configWindow;
 let tray;
+
+const configFile = path.join(__dirname, "assets", "db", "appDb.json");
+const fileData = fs.readFileSync(configFile, "utf-8");
+const configData = JSON.parse(fileData);
+
+DownloadManager.register({
+  downloadFolder: configData.printerOptions.readPath,
+});
 
 async function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -81,10 +90,6 @@ const menu = [
   },
 ];
 
-const configFile = path.join(__dirname, "assets", "db", "appDb.json");
-const fileData = fs.readFileSync(configFile, "utf-8");
-const configData = JSON.parse(fileData);
-
 app.on("ready", () => {
   createMainWindow();
   const mainMenu = Menu.buildFromTemplate(menu);
@@ -120,8 +125,6 @@ app.on("ready", () => {
     }
     return true;
   });
-  const defaultDownloadFolder = configData.printerOptions.readPath;
-  app.setPath("downloads", defaultDownloadFolder);
 });
 
 const getPrinters = async () => {
@@ -181,6 +184,24 @@ ipcMain.on("print_silent", (e, data) => {
   printFile(data.path, configData.printerOptions.defaultPrinter);
 });
 
+ipcMain.on("print_remote", (e, data) => {
+  const machineNo = configData.printerOptions.machineNo;
+  if (machineNo === data.machineNo) {
+    DownloadManager.download(
+      {
+        url: data.path,
+      },
+      function (error, info) {
+        if (error) {
+          console.log(error);
+          return;
+        }
+        console.log("Done Downloading");
+      }
+    );
+  }
+});
+
 app.on("window-all-closed", () => {
   console.log("quiting...");
   app.quit();
@@ -191,3 +212,9 @@ app.on("activate", () => {
     createMainWindow();
   }
 });
+
+/*
+1- create an option in the configuration page to set the machine id-->done!
+2- make the application works in the background and shows when tray icon is clicked-->done!
+3- protect the application with key or password
+*/

@@ -1,1 +1,1 @@
-{"printerOptions":{"readOption":"serverFile","readPath":"/home/hossam/Desktop/printContainer","host":"wss://leanapi.gooadmin.art","eventListener":"send_print_job","defaultPrinter":"CUPS-BRF-Printer"}}
+{"printerOptions":{"readOption":"serverFile","readPath":"/home/hossam/Documents","host":"ws://localhost:5055","eventListener":"print_job","defaultPrinter":"CUPS-BRF-Printer","machineNo": "machine1"}}

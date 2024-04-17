@@ -1,9 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 const { ipcRenderer } = require("electron");
-const downloadManager = require("electron-download-manager");
 
 const configFile = path.join(__dirname, "db", "appDb.json");
+const data = fs.readFileSync(configFile, "utf-8");
+const configData = JSON.parse(data);
+const option = configData.printerOptions.readOption;
+const hostPath = configData.printerOptions.readPath;
+const hostServer = configData.printerOptions.host;
+const socketEvent = configData.printerOptions.eventListener;
 
 const isFileExist = (filePath) => {
   try {
@@ -33,12 +38,6 @@ const watchFiles = (folderPath) => {
   }
 };
 
-const data = fs.readFileSync(configFile, "utf-8");
-const configData = JSON.parse(data);
-const option = configData.printerOptions.readOption;
-const hostPath = configData.printerOptions.readPath;
-const hostServer = configData.printerOptions.host;
-const socketEvent = configData.printerOptions.eventListener;
 if (hostPath.length <= 0) {
   alert("please select silent printing options first from settings menu");
 } else {
@@ -48,14 +47,11 @@ if (hostPath.length <= 0) {
     socket.on("connect", () => {
       alert("connected to server");
     });
-    socket.on(`${socketEvent}`, (data) => {
-      downloadManager.download({
-        URL: data.fileUrl,
-        onprogress: (progress) => {
-          console.log(`Download Progress: ${progress}%`);
-        },
+    socket.on(`${socketEvent}`, (event) => {
+      ipcRenderer.send("print_remote", {
+        path: event.fileUrl,
+        machine: event.machineNo,
       });
-      // ipcRenderer.send("print_silent", { path: data.fileUrl });
     });
   }
 }
