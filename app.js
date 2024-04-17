@@ -1,22 +1,66 @@
-const fs = require("fs");
 const path = require("path");
 const { app, BrowserWindow, Menu, dialog, ipcMain, Tray } = require("electron");
 const DownloadManager = require("electron-download-manager");
 const printer = require("pdf-to-printer");
+
+const dbController = require("./controllers/dbController");
 // set env
 process.env.NODE_ENV = "development";
 const isDev = process.env.NODE_ENV !== "production" ? true : false;
+// db init
+
+let readOption;
+let readPath;
+let defaultPrinter;
+let machineNo;
+let host;
+let eventListener;
+
+dbController.dbInit(app);
+dbController.createConfigTable();
+
+async function getConfigurationData() {
+  const configs = await dbController.getConfigData();
+  configs.forEach((row) => {
+    readOption = row.readOption;
+    readPath = row.readPath;
+    defaultPrinter = row.defaultPrinter;
+    machineNo = row.machineNo;
+    host = row.host;
+    eventListener = row.eventListener;
+  });
+}
+
+getConfigurationData();
+
+ipcMain.on("set_configs", async (e, data) => {
+  const configData = data.configData;
+  dbController.setDataToConfigTable(configData);
+  const configs = await dbController.getConfigData();
+  configs.forEach((row) => {
+    readOption = row.readOption;
+    readPath = row.readPath;
+    defaultPrinter = row.defaultPrinter;
+    machineNo = row.machineNo;
+    host = row.host;
+    eventListener = row.eventListener;
+  });
+  e.sender.send("config_data", {
+    readOption,
+    readPath,
+    defaultPrinter,
+    host,
+    eventListener,
+    machineNo,
+  });
+});
 
 let mainWindow;
 let configWindow;
 let tray;
 
-const configFile = path.join(__dirname, "assets", "db", "appDb.json");
-const fileData = fs.readFileSync(configFile, "utf-8");
-const configData = JSON.parse(fileData);
-
 DownloadManager.register({
-  downloadFolder: configData.printerOptions.readPath,
+  downloadFolder: readPath, //configData.printerOptions.readPath,
 });
 
 async function createMainWindow() {
@@ -134,6 +178,17 @@ const getPrinters = async () => {
   return printers;
 };
 
+ipcMain.on("get_config_data", async () => {
+  mainWindow.webContents.send("config_data", {
+    readOption,
+    readPath,
+    defaultPrinter,
+    host,
+    eventListener,
+    machineNo,
+  });
+});
+
 ipcMain.on("get_printers_list", async () => {
   printers = await getPrinters();
   configWindow.webContents.send("printers_list", { printers: printers });
@@ -181,11 +236,11 @@ function printFile(filePath, printerName) {
 }
 
 ipcMain.on("print_silent", (e, data) => {
-  printFile(data.path, configData.printerOptions.defaultPrinter);
+  printFile(data.path, defaultPrinter); //configData.printerOptions.defaultPrinter);
 });
 
 ipcMain.on("print_remote", (e, data) => {
-  const machineNo = configData.printerOptions.machineNo;
+  const machineNo = machineNo; //configData.printerOptions.machineNo;
   if (machineNo === data.machineNo) {
     DownloadManager.download(
       {
@@ -213,8 +268,3 @@ app.on("activate", () => {
   }
 });
 
-/*
-1- create an option in the configuration page to set the machine id-->done!
-2- make the application works in the background and shows when tray icon is clicked-->done!
-3- protect the application with key or password
-*/

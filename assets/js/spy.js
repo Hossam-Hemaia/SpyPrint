@@ -2,13 +2,23 @@ const fs = require("fs");
 const path = require("path");
 const { ipcRenderer } = require("electron");
 
-const configFile = path.join(__dirname, "db", "appDb.json");
-const data = fs.readFileSync(configFile, "utf-8");
-const configData = JSON.parse(data);
-const option = configData.printerOptions.readOption;
-const hostPath = configData.printerOptions.readPath;
-const hostServer = configData.printerOptions.host;
-const socketEvent = configData.printerOptions.eventListener;
+let readOption;
+let readPath;
+let host;
+let eventListener;
+
+setTimeout(() => {
+  ipcRenderer.send("get_config_data");
+}, 1000);
+
+ipcRenderer.on("config_data", (e, data) => {
+  readOption = data.readOption;
+  readPath = data.readPath;
+  defaultPrinter = data.defaultPrinter;
+  machineNo = data.machineNo;
+  host = data.host;
+  eventListener = data.eventListener;
+});
 
 const isFileExist = (filePath) => {
   try {
@@ -37,24 +47,27 @@ const watchFiles = (folderPath) => {
     console.log(err);
   }
 };
-
-if (hostPath.length <= 0) {
-  alert("please select silent printing options first from settings menu");
-} else {
-  watchFiles(path.join(hostPath));
-  if (option === "serverFile") {
-    const socket = io(hostServer, { transports: ["websocket", "polling"] });
-    socket.on("connect", () => {
-      alert("connected to server");
-    });
-    socket.on(`${socketEvent}`, (event) => {
-      ipcRenderer.send("print_remote", {
-        path: event.fileUrl,
-        machine: event.machineNo,
+setTimeout(() => {
+  if (readPath.length <= 0) {
+    alert(
+      "please select silent printing options first from configuration menu"
+    );
+  } else {
+    watchFiles(path.join(readPath));
+    if (readOption === "serverFile") {
+      const socket = io(host, { transports: ["websocket", "polling"] });
+      socket.on("connect", () => {
+        alert("connected to server");
       });
-    });
+      socket.on(`${eventListener}`, (event) => {
+        ipcRenderer.send("print_remote", {
+          path: event.fileUrl,
+          machine: event.machineNo,
+        });
+      });
+    }
   }
-}
+}, 2000);
 
 ipcRenderer.on("error_print", () => {
   alert("incorrect file type! print pdf types only");
