@@ -12,3 +12,23 @@ exports.getMacAddress = (os) => {
     throw err;
   }
 };
+
+exports.checkActivation = (os, activationData) => {
+  try {
+    const macAddress = this.getMacAddress(os);
+    if (activationData.length > 0) {
+      if (
+        macAddress === activationData[0].mac &&
+        activationData[0].isActive === 1
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  } catch (err) {
+    throw err;
+  }
+};

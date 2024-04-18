@@ -233,3 +233,17 @@ exports.getActivationData = async () => {
     throw err;
   }
 };
+
+exports.deleteDatabaseTable = (tableName) => {
+  try {
+    const sql = `DROP TABLE IF EXISTS ${tableName}`;
+    db.run(sql, (err) => {
+      if (err) {
+        console.log("Could not drop table: ", tableName);
+      }
+      console.log("table dropped successfully!");
+    });
+  } catch (err) {
+    throw err;
+  }
+};

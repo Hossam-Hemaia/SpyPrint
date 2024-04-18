@@ -3,13 +3,16 @@ const os = require("os");
 const { app, BrowserWindow, Menu, dialog, ipcMain, Tray } = require("electron");
 const DownloadManager = require("electron-download-manager");
 const printer = require("pdf-to-printer");
+require("dotenv").config();
 
 const dbController = require("./controllers/dbController");
+const activateController = require("./controllers/activateController");
+
 // set env
-process.env.NODE_ENV = "production";
+process.env.NODE_ENV = "dev";
 const isDev = process.env.NODE_ENV !== "production" ? true : false;
+
 // db init
-let isActive;
 let readOption;
 let readPath;
 let defaultPrinter;
@@ -21,17 +24,35 @@ dbController.dbInit(app);
 dbController.createConfigTable();
 dbController.createActivationTable();
 
+ipcMain.on("get_mac_addr", (e) => {
+  const macAddress = activateController.getMacAddress(os);
+  e.sender.send("mac_addr", { macAddress, macAddress });
+});
+
+ipcMain.on("activation_success", (e, data) => {
+  activationData = [
+    {
+      mac: data.macAddress,
+      code: data.activationCode,
+      isActive: 1,
+    },
+  ];
+  dbController.setActivationData(activationData);
+});
+
 async function getApplicationIsActive() {
   const activationData = await dbController.getActivationData();
-  activationData.forEach((row) => {
-    isActive = row.isActive;
-  });
+  const isActivated = activateController.checkActivation(os, activationData);
+  if (isActivated) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
-getApplicationIsActive();
-
 async function getConfigurationData() {
-  if (isActive && isActive === 1) {
+  let isActive = await getApplicationIsActive();
+  if (isActive) {
     const configs = await dbController.getConfigData();
     configs.forEach((row) => {
       readOption = row.readOption;
@@ -47,7 +68,8 @@ async function getConfigurationData() {
 getConfigurationData();
 
 ipcMain.on("set_configs", async (e, data) => {
-  if (isActive && isActive === 1) {
+  let isActive = await getApplicationIsActive();
+  if (isActive) {
     const configData = data.configData;
     dbController.setDataToConfigTable(configData);
     const configs = await dbController.getConfigData();
@@ -118,6 +140,20 @@ function createAboutWindow() {
   aboutWindow.loadFile("./assets/about.html");
 }
 
+function createActivationWindow() {
+  activationWindow = new BrowserWindow({
+    title: "Activation",
+    width: 400,
+    height: 550,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+  activationWindow.loadFile("./assets/activate.html");
+  isDev ? activationWindow.webContents.openDevTools() : "";
+}
+
 const menu = [
   { role: "appMenu" },
   {
@@ -132,7 +168,7 @@ const menu = [
       {
         label: "Activate...",
         click: () => {
-          createConfigWindow();
+          createActivationWindow();
         },
       },
     ],
@@ -162,7 +198,6 @@ app.on("ready", () => {
   createMainWindow();
   const mainMenu = Menu.buildFromTemplate(menu);
   Menu.setApplicationMenu(mainMenu);
-  console.log(isDev);
   if (isDev) {
     mainWindow.webContents.openDevTools();
   }
@@ -203,9 +238,10 @@ const getPrinters = async () => {
   return printers;
 };
 
-ipcMain.on("get_config_data", async () => {
-  if (isActive && isActive === 1) {
-    mainWindow.webContents.send("config_data", {
+ipcMain.on("get_config_data", async (e) => {
+  let isActive = await getApplicationIsActive();
+  if (isActive) {
+    e.sender.send("config_data", {
       readOption,
       readPath,
       defaultPrinter,
@@ -214,7 +250,7 @@ ipcMain.on("get_config_data", async () => {
       machineNo,
     });
   } else {
-    mainWindow.webContents.send("activation_error");
+    e.sender.send("activation_error");
   }
 });
 
@@ -298,9 +334,5 @@ app.on("activate", () => {
 });
 
 /*
-1- create activation window
-2- make the activation request
-3- handle server response
-4- validate activation
 5- encrypt activation data
 */
