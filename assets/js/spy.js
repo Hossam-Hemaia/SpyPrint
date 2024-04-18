@@ -49,9 +49,7 @@ const watchFiles = (folderPath) => {
 };
 setTimeout(() => {
   if (readPath.length <= 0) {
-    alert(
-      "please select silent printing options first from configuration menu"
-    );
+    alert("please select silent printing options first from settings menu");
   } else {
     watchFiles(path.join(readPath));
     if (readOption === "serverFile") {
@@ -68,6 +66,10 @@ setTimeout(() => {
     }
   }
 }, 2000);
+
+ipcRenderer.on("activation_error", () => {
+  alert("Your application is not active! please activate from activation menu");
+});
 
 ipcRenderer.on("error_print", () => {
   alert("incorrect file type! print pdf types only");

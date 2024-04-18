@@ -1,4 +1,5 @@
 const path = require("path");
+const os = require("os");
 const { app, BrowserWindow, Menu, dialog, ipcMain, Tray } = require("electron");
 const DownloadManager = require("electron-download-manager");
 const printer = require("pdf-to-printer");
@@ -8,7 +9,7 @@ const dbController = require("./controllers/dbController");
 process.env.NODE_ENV = "production";
 const isDev = process.env.NODE_ENV !== "production" ? true : false;
 // db init
-
+let isActive;
 let readOption;
 let readPath;
 let defaultPrinter;
@@ -18,41 +19,58 @@ let eventListener;
 
 dbController.dbInit(app);
 dbController.createConfigTable();
+dbController.createActivationTable();
 
-async function getConfigurationData() {
-  const configs = await dbController.getConfigData();
-  configs.forEach((row) => {
-    readOption = row.readOption;
-    readPath = row.readPath;
-    defaultPrinter = row.defaultPrinter;
-    machineNo = row.machineNo;
-    host = row.host;
-    eventListener = row.eventListener;
+async function getApplicationIsActive() {
+  const activationData = await dbController.getActivationData();
+  activationData.forEach((row) => {
+    isActive = row.isActive;
   });
 }
 
-await getConfigurationData();
+getApplicationIsActive();
+
+async function getConfigurationData() {
+  if (isActive && isActive === 1) {
+    const configs = await dbController.getConfigData();
+    configs.forEach((row) => {
+      readOption = row.readOption;
+      readPath = row.readPath;
+      defaultPrinter = row.defaultPrinter;
+      machineNo = row.machineNo;
+      host = row.host;
+      eventListener = row.eventListener;
+    });
+  }
+}
+
+getConfigurationData();
 
 ipcMain.on("set_configs", async (e, data) => {
-  const configData = data.configData;
-  dbController.setDataToConfigTable(configData);
-  const configs = await dbController.getConfigData();
-  configs.forEach((row) => {
-    readOption = row.readOption;
-    readPath = row.readPath;
-    defaultPrinter = row.defaultPrinter;
-    machineNo = row.machineNo;
-    host = row.host;
-    eventListener = row.eventListener;
-  });
-  e.sender.send("config_data", {
-    readOption,
-    readPath,
-    defaultPrinter,
-    host,
-    eventListener,
-    machineNo,
-  });
+  if (isActive && isActive === 1) {
+    const configData = data.configData;
+    dbController.setDataToConfigTable(configData);
+    const configs = await dbController.getConfigData();
+    configs.forEach((row) => {
+      readOption = row.readOption;
+      readPath = row.readPath;
+      defaultPrinter = row.defaultPrinter;
+      machineNo = row.machineNo;
+      host = row.host;
+      eventListener = row.eventListener;
+    });
+    e.sender.send("config_data", {
+      readOption,
+      readPath,
+      defaultPrinter,
+      host,
+      eventListener,
+      machineNo,
+    });
+    app.quit();
+  } else {
+    e.sender.send("activation_error");
+  }
 });
 
 let mainWindow;
@@ -107,6 +125,12 @@ const menu = [
     submenu: [
       {
         label: "Configure...",
+        click: () => {
+          createConfigWindow();
+        },
+      },
+      {
+        label: "Activate...",
         click: () => {
           createConfigWindow();
         },
@@ -180,14 +204,18 @@ const getPrinters = async () => {
 };
 
 ipcMain.on("get_config_data", async () => {
-  mainWindow.webContents.send("config_data", {
-    readOption,
-    readPath,
-    defaultPrinter,
-    host,
-    eventListener,
-    machineNo,
-  });
+  if (isActive && isActive === 1) {
+    mainWindow.webContents.send("config_data", {
+      readOption,
+      readPath,
+      defaultPrinter,
+      host,
+      eventListener,
+      machineNo,
+    });
+  } else {
+    mainWindow.webContents.send("activation_error");
+  }
 });
 
 ipcMain.on("get_printers_list", async () => {
@@ -268,3 +296,11 @@ app.on("activate", () => {
     createMainWindow();
   }
 });
+
+/*
+1- create activation window
+2- make the activation request
+3- handle server response
+4- validate activation
+5- encrypt activation data
+*/

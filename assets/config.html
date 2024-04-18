@@ -73,22 +73,23 @@
     <div>
       <h3>Print Options</h3>
       <div id="printers">
-        <label>Select Printer* </label>
+        <label>Select Printer* (required) </label>
         <button type="button" id="plistBtn">Get Available Printers</button>
-        <select name="printersList" id="plist"></select>
+        <select name="printersList" id="plist" required></select>
       </div>
       <div class="folderPath">
-        <label> Select Folder Path* </label>
+        <label> Select Folder Path* (required)</label>
         <button type="button" id="fldrdilg">Select Folder Path</button>
         <label for="pthout">Selected Path: <output id="pthout"></output></label>
       </div>
       <div>
-        <label>Set Machine id</label>
+        <label>Set Machine id* (required)</label>
         <input
           type="text"
           name="machineNo"
           id="mchnid"
           placeholder="machine1"
+          required
         />
       </div>
       <div>

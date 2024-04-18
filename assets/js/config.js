@@ -46,6 +46,11 @@ savePrinterConfig.addEventListener("click", async () => {
     },
   ];
   ipcRenderer.send("set_configs", { configData: configs });
+  ipcRenderer.on("activation_error", (e) => {
+    alert(
+      "Your application is not active! please activate from activation menu"
+    );
+  });
   alert("configuration saved");
   window.close();
 });
