@@ -8,7 +8,7 @@ const activateApp = (macAddress) => {
     macAddress,
   };
   console.log(JSON.stringify(data));
-  fetch(process.env.ACTIVATION_HOST, {
+  fetch("https://api.mandoobku.com/api/v1/activate/code", {
     method: "POST",
     body: JSON.stringify(data),
     headers: {
@@ -23,6 +23,8 @@ const activateApp = (macAddress) => {
         ipcRenderer.send("activation_success", { activationCode, macAddress });
         alert("activation success!");
         window.close();
+      } else {
+        alert("activation failure!");
       }
     })
     .catch((err) => {

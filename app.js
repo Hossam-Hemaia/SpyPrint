@@ -9,7 +9,7 @@ const dbController = require("./controllers/dbController");
 const activateController = require("./controllers/activateController");
 
 // set env
-process.env.NODE_ENV = "dev";
+process.env.NODE_ENV = "production";
 const isDev = process.env.NODE_ENV !== "production" ? true : false;
 
 // db init
@@ -108,7 +108,7 @@ async function createMainWindow() {
     title: "Spy Print",
     width: 500,
     height: 600,
-    icon: "./assets/icons/printer.png",
+    icon: path.join(__dirname, "assets", "icons", "win", "icon.ico"),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

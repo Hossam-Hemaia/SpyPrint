@@ -4,12 +4,18 @@
   "version": "1.0.0",
   "description": "silent printing application",
   "main": "app.js",
+  "build": {
+    "appId": "com.spyprint.app",
+    "productName": "Spy Print",
+    "target": "NSIS",
+    "icon": "assets/icons/win/printer.ico"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "dev": "nodemon --exec electron .",
     "postinstall": "install-app-deps",
-    "build": "electron-builder",
+    "electron-build": "electron-builder",
     "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
     "package-win": "electron-packager . --overwrite --asar --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=false --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"SPY PRINT\"",
     "package-linux": "electron-packager . --overwrite --platform=linux --arch=x64 --icon=assets/icons/png/icon.png --prune=false --out=release-builds"

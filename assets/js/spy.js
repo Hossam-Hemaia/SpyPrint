@@ -20,6 +20,11 @@ ipcRenderer.on("config_data", (e, data) => {
   eventListener = data.eventListener;
 });
 
+function isPdfType(filePath) {
+  let fileExtension = path.extname(filePath).toLocaleLowerCase();
+  return fileExtension === ".pdf";
+}
+
 const isFileExist = (filePath) => {
   try {
     fs.access(filePath, fs.constants.F_OK, async (err) => {
@@ -27,7 +32,9 @@ const isFileExist = (filePath) => {
         console.log(err);
         return;
       } else {
-        ipcRenderer.send("print_silent", { path: filePath });
+        if (isPdfType(filePath)) {
+          ipcRenderer.send("print_silent", { path: filePath });
+        }
       }
     });
   } catch (err) {

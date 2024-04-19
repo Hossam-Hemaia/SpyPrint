@@ -35,6 +35,10 @@ savePrinterConfig.addEventListener("click", async () => {
   const machineNo = machineId.value;
   let host = hostInput.value;
   let socketName = socketInput.value;
+  if (selectPrinters === "" || output.innerText === "" || machineNo === "") {
+    alert("pleas fill all required fields!");
+    return;
+  }
   const configs = [
     {
       readOption: socketName.length > 0 ? "serverFile" : "localFile",
