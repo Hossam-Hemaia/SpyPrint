@@ -8,7 +8,7 @@ const activateApp = (macAddress) => {
     macAddress,
   };
   console.log(JSON.stringify(data));
-  fetch("https://api.mandoobku.com/api/v1/activate/code", {
+  fetch("https://activespyprint.gooadmin.com/api/v1/activate/code", {
     method: "POST",
     body: JSON.stringify(data),
     headers: {

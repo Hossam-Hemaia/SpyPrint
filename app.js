@@ -290,6 +290,7 @@ function printFile(filePath, printerName) {
   }
   const options = {
     printer: printerName,
+    scale: "shrink",
     silent: true,
   };
   printer
