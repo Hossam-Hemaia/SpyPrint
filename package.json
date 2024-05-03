@@ -1,6 +1,6 @@
 {
   "name": "spyprint",
-  "productName": "Spy Print",
+  "productName": "Goo-Print",
   "version": "1.0.0",
   "description": "silent printing application",
   "main": "app.js",
@@ -33,6 +33,6 @@
     "dotenv": "^16.4.5",
     "electron-download-manager": "^2.1.2",
     "pdf-to-printer": "^5.6.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.6"
   }
 }
