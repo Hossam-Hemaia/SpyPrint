@@ -1,9 +1,0 @@
-directories:
-  output: dist
-  buildResources: build
-appId: com.spyprint.app
-productName: Spy Print
-target: NSIS
-icon: assets/icons/win/printer.ico
-files: []
-electronVersion: 28.3.1

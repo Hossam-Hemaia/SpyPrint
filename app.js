@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { app, BrowserWindow, Menu, dialog, ipcMain, Tray } = require("electron");
@@ -50,10 +51,32 @@ async function getApplicationIsActive() {
   }
 }
 
+function removeOldFiles(folderPath) {
+  try {
+    fs.readdir(folderPath, (err, files) => {
+      if (err) {
+        throw err;
+      }
+      files.forEach((file) => {
+        let filePath = path.join(folderPath, file);
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            throw err;
+          }
+        });
+      });
+    });
+  } catch (err) {
+    throw err;
+  }
+}
+
 async function getConfigurationData() {
   let isActive = await getApplicationIsActive();
   if (isActive) {
     const configs = await dbController.getConfigData();
+    let folderPath = configs[0].readPath;
+    removeOldFiles(folderPath);
     configs.forEach((row) => {
       readOption = row.readOption;
       readPath = row.readPath;
