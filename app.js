@@ -342,31 +342,14 @@ ipcMain.on("print_remote", async (e, data) => {
         file.on("finish", () => {
           file.close();
           console.log("File downloaded to:", filePath);
+          printFile(data.path, defaultPrinter);
         });
       })
+
       .on("error", (err) => {
         fs.unlink(filePath, () => {}); // Delete the file if download fails
         console.error("Error downloading file:", err);
       });
-    /*DownloadManager.download(
-      {
-        url: data.path,
-      },
-      function (error, info) {
-        if (error) {
-          console.log(error);
-          return;
-        }
-        const filePath = configs[0].readPath + info.filename;
-        fs.rename(info.filePath, filePath, (err) => {
-          if (err) {
-            console.error('Error moving file:', err);
-            return;
-          }
-          console.log('File downloaded to:', filePath);
-        });
-      }
-    );*/
   }
 });
 
