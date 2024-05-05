@@ -144,7 +144,8 @@ exports.createActivationTable = () => {
       db.run(`CREATE TABLE IF NOT EXISTS active (
         mac TEXT,
         code TEXT,
-        isActive INTEGER
+        isActive INTEGER,
+        expiryDate TEXT
       )`);
     });
   } catch (err) {
@@ -169,10 +170,10 @@ exports.isActiveTableEmpty = (cb) => {
 exports.insertActivationData = (activationData) => {
   try {
     const stmt = db.prepare(
-      "INSERT INTO active (mac, code, isActive) VALUES (?, ?, ?)"
+      "INSERT INTO active (mac, code, isActive, expiryDate) VALUES (?, ?, ?, ?)"
     );
     activationData.forEach((entry) => {
-      stmt.run(entry.mac, entry.code, entry.isActive);
+      stmt.run(entry.mac, entry.code, entry.isActive, entry.expiryDate);
     });
   } catch (err) {
     throw err;
@@ -187,10 +188,11 @@ exports.updateActivationData = (activationData) => {
           mac = ?,
           code = ?,
           isActive = ?
+          expiryDate = ?
         `
       );
       activationData.forEach((entry) => {
-        updateStmt.run(entry.mac, entry.code, entry.isActive);
+        updateStmt.run(entry.mac, entry.code, entry.isActive, entry.expiryDate);
         updateStmt.finalize();
       });
     });

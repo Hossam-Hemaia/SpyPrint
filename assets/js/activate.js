@@ -20,7 +20,11 @@ const activateApp = (macAddress) => {
     })
     .then((result) => {
       if (result.success) {
-        ipcRenderer.send("activation_success", { activationCode, macAddress });
+        ipcRenderer.send("activation_success", {
+          activationCode,
+          macAddress,
+          expiryDate: result.expiryDate,
+        });
         alert("activation success!");
         window.close();
       } else {

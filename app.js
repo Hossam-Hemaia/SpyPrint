@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { app, BrowserWindow, Menu, dialog, ipcMain, Tray } = require("electron");
+const https = require("https");
 const DownloadManager = require("electron-download-manager");
 const printer = require("pdf-to-printer");
 require("dotenv").config();
@@ -10,7 +11,7 @@ const dbController = require("./controllers/dbController");
 const activateController = require("./controllers/activateController");
 
 // set env
-process.env.NODE_ENV = "production";
+process.env.NODE_ENV = "dev";
 const isDev = process.env.NODE_ENV !== "production" ? true : false;
 
 // db init
@@ -35,6 +36,7 @@ ipcMain.on("activation_success", (e, data) => {
     {
       mac: data.macAddress,
       code: data.activationCode,
+      expiryDate: data.expiryDate,
       isActive: 1,
     },
   ];
@@ -72,6 +74,7 @@ function removeOldFiles(folderPath) {
 }
 
 async function getConfigurationData() {
+  // dbController.deleteDatabaseTable("active");
   let isActive = await getApplicationIsActive();
   if (isActive) {
     const configs = await dbController.getConfigData();
@@ -313,7 +316,6 @@ function printFile(filePath, printerName) {
   }
   const options = {
     printer: printerName,
-    scale: "shrink",
     silent: true,
   };
   printer
@@ -325,13 +327,28 @@ function printFile(filePath, printerName) {
 }
 
 ipcMain.on("print_silent", (e, data) => {
-  printFile(data.path, defaultPrinter); //configData.printerOptions.defaultPrinter);
+  printFile(data.path, defaultPrinter);
 });
 
-ipcMain.on("print_remote", (e, data) => {
-  const machineNo = machineNo; //configData.printerOptions.machineNo;
-  if (machineNo === data.machineNo) {
-    DownloadManager.download(
+ipcMain.on("print_remote", async (e, data) => {
+  const configs = await dbController.getConfigData();
+  const machineNo = configs[0].machineNo;
+  if (machineNo === data.machine) {
+    const filePath = path.join(configs[0].readPath, `${Date.now()}.pdf`); // Adjust filename and path as needed
+    const file = fs.createWriteStream(filePath);
+    https
+      .get(data.path, (response) => {
+        response.pipe(file);
+        file.on("finish", () => {
+          file.close();
+          console.log("File downloaded to:", filePath);
+        });
+      })
+      .on("error", (err) => {
+        fs.unlink(filePath, () => {}); // Delete the file if download fails
+        console.error("Error downloading file:", err);
+      });
+    /*DownloadManager.download(
       {
         url: data.path,
       },
@@ -340,9 +357,16 @@ ipcMain.on("print_remote", (e, data) => {
           console.log(error);
           return;
         }
-        console.log("Done Downloading");
+        const filePath = configs[0].readPath + info.filename;
+        fs.rename(info.filePath, filePath, (err) => {
+          if (err) {
+            console.error('Error moving file:', err);
+            return;
+          }
+          console.log('File downloaded to:', filePath);
+        });
       }
-    );
+    );*/
   }
 });
 

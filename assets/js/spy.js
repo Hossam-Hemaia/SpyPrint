@@ -32,7 +32,9 @@ const isFileExist = (filePath) => {
         console.log(err);
         return;
       } else {
+        console.log("file exists!")
         if (isPdfType(filePath)) {
+          console.log("sending print order...")
           ipcRenderer.send("print_silent", { path: filePath });
         }
       }
@@ -46,6 +48,7 @@ const watchFiles = (folderPath) => {
   try {
     fs.watch(folderPath, (eventType, fileName) => {
       if (eventType === "rename") {
+        console.log(fileName);
         const newFilePath = `${folderPath}/${fileName}`;
         isFileExist(newFilePath);
       }
