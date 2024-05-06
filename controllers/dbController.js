@@ -7,6 +7,7 @@ exports.dbInit = (app) => {
   try {
     const dbPath = path.join(app.getPath("userData"), "config.db");
     db = new sqlite.Database(dbPath);
+    db.run("PRAGMA key = 'inTheNameOfAllahTheMostGraciousTheMostMerciful';");
   } catch (err) {
     throw err;
   }
@@ -139,18 +140,18 @@ exports.getConfigData = async () => {
 };
 
 exports.createActivationTable = () => {
-  try {
-    db.serialize(() => {
+  db.serialize(() => {
+    try {
       db.run(`CREATE TABLE IF NOT EXISTS active (
         mac TEXT,
         code TEXT,
         isActive INTEGER,
         expiryDate TEXT
       )`);
-    });
-  } catch (err) {
-    throw err;
-  }
+    } catch (err) {
+      throw err;
+    }
+  });
 };
 
 exports.isActiveTableEmpty = (cb) => {
@@ -175,6 +176,7 @@ exports.insertActivationData = (activationData) => {
     activationData.forEach((entry) => {
       stmt.run(entry.mac, entry.code, entry.isActive, entry.expiryDate);
     });
+    stmt.finalize();
   } catch (err) {
     throw err;
   }
@@ -187,7 +189,7 @@ exports.updateActivationData = (activationData) => {
         `UPDATE active SET
           mac = ?,
           code = ?,
-          isActive = ?
+          isActive = ?,
           expiryDate = ?
         `
       );

@@ -3,7 +3,6 @@ const path = require("path");
 const os = require("os");
 const { app, BrowserWindow, Menu, dialog, ipcMain, Tray } = require("electron");
 const https = require("https");
-const DownloadManager = require("electron-download-manager");
 const printer = require("pdf-to-printer");
 require("dotenv").config();
 
@@ -124,10 +123,6 @@ ipcMain.on("set_configs", async (e, data) => {
 let mainWindow;
 let configWindow;
 let tray;
-
-DownloadManager.register({
-  downloadFolder: readPath, //configData.printerOptions.readPath,
-});
 
 async function createMainWindow() {
   mainWindow = new BrowserWindow({
