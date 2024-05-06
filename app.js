@@ -342,7 +342,7 @@ ipcMain.on("print_remote", async (e, data) => {
         file.on("finish", () => {
           file.close();
           console.log("File downloaded to:", filePath);
-          printFile(data.path, defaultPrinter);
+          printFile(filePath, defaultPrinter);
         });
       })
 
